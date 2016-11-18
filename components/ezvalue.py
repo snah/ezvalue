@@ -59,11 +59,15 @@ class Value(metaclass=ValueMeta):
         TODO: examples.
         TODO: supplement with keyword arguments.
         """
-        if source:
-            for name in self._attributes:
-                setattr(self, name, getattr(source, name))
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        for name in self._attributes:
+            if source:
+                try:
+                    value = getattr(source, name)
+                except AttributeError:
+                    pass
+            if name in kwargs:
+                value = kwargs[name]
+            setattr(self, name, value)
 
     def __setattr__(self, name, value):
         if name in self.__dict__ or name not in self._attributes:

@@ -47,6 +47,14 @@ class TestValueObject(util.TestCase):
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
 
-    #TODO: test overwrite attributes.
+    def test_overwrite_attributes_with_kwargs(self):
+        mutable_foo = Foo.Mutable()
+        mutable_foo.bar = 1
+        mutable_foo.baz = 'hi'
+        foo = Foo(mutable_foo, baz='bye')
+        self.assertEqual(foo.bar, 1)
+        self.assertEqual(foo.baz, 'bye')
+
+
     #TODO: test missing attributes.
     #TODO: test supplement attributes.
