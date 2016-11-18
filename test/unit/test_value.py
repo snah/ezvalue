@@ -1,20 +1,18 @@
 import unittest
 
-from test import util
-
-import components.ezvalue
+import ezvalue
 
 
-class Foo(components.ezvalue.Value):
+class Foo(ezvalue.Value):
     """Value object docstring."""
 
     bar = """Docstring 1."""
     baz = """Docstring 2."""
 
 
-class TestValueObject(util.TestCase):
+class TestValueObject(unittest.TestCase):
     def test_direct_instantiation(self):
-        empty_value = components.ezvalue.Value()
+        empty_value = ezvalue.Value()
         self.assertCountEqual(empty_value._attributes, [])
 
     def test_list_attributes(self):

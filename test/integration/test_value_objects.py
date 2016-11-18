@@ -1,18 +1,16 @@
 import unittest
 
-from test import util
-
-import components.ezvalue
+import ezvalue
 
 
-class Foo(components.ezvalue.Value):
+class Foo(ezvalue.Value):
     """Value object docstring."""
 
     bar = """Docstring 1."""
     baz = """Docstring 2."""
 
 
-class TestValueObject(util.TestCase):
+class TestValueObject(unittest.TestCase):
     def test_create_immutable(self):
         foo = Foo(bar=1, baz='hi')
         self.assertEqual(foo.bar, 1)
