@@ -33,6 +33,7 @@ class Value(metaclass=ValueMeta):
     AttributeError.
 
     TODO: summerize functionality.
+    TODO: document _attributes.
     TODO: methods allowed?
     TODO: append attribute docstrings to class docstring?
     '''
@@ -43,7 +44,8 @@ class Value(metaclass=ValueMeta):
         If the source argument is given the fields will be
         initialized from equally named fields in the source object.
         This for example allows the value object to be created
-        from a named tuple.
+        from a named tuple. If the source object has fields that
+        are not defined in the value object they will be ignored.
         
         Alternatively the objects can be initialized by supplying the
         names and values as keyword arguments.
@@ -55,18 +57,21 @@ class Value(metaclass=ValueMeta):
         source object and overwriting values as needed with
         keyword arguments.
 
-        TODO: specify exceptions (missing/unknown attributes).
+        If the value object defines an attribute that is not present
+        in either the source object or the keyword arguments then
+        an AttributeError is raised. Extra keyword arguments that
+        are not known to the value object are silently ignored.
+        
         TODO: examples.
-        TODO: supplement with keyword arguments.
         """
         for name in self._attributes:
-            if source:
-                try:
-                    value = getattr(source, name)
-                except AttributeError:
-                    pass
             if name in kwargs:
                 value = kwargs[name]
+            elif source:
+                value = getattr(source, name)
+            else:
+                raise AttributeError("Attribute '{}' not specified."
+                        .format(name))
             setattr(self, name, value)
 
     def __setattr__(self, name, value):
@@ -76,11 +81,19 @@ class Value(metaclass=ValueMeta):
             super().__setattr__(name, value)
 
     @classmethod
-    def Mutable(cls):
-        """Return an instance of mutable version of the value object.
+    def Mutable(cls, source=None, **kwargs):
+        """Return an instance of a mutable version of the value object.
         
         TODO: detailed description.
         """
-        class cls:
-            pass
-        return cls
+        class MutableValue:
+            def __init__(self, source=None, **kwargs):
+                if source:
+                    for name in source._attributes:
+                        setattr(self, name, getattr(source, name))
+                for name, value in kwargs.items():
+                    setattr(self, name, value)
+
+            def immutable(self):
+                return cls(self)
+        return MutableValue(source, **kwargs)

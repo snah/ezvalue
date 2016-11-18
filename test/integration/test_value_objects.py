@@ -19,9 +19,7 @@ class TestValueObject(unittest.TestCase):
             foo.bar = 3
 
     def test_construct_mutable_to_send_immutable(self):
-        mutable_foo = Foo.Mutable()
-        mutable_foo.bar = 1
-        mutable_foo.baz = 'hi'
+        mutable_foo = Foo.Mutable(bar=1, baz='hi')
         mutable_foo.bar = 2
         foo = mutable_foo.immutable()
         self.assertEqual(foo.bar, 2)
