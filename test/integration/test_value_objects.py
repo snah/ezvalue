@@ -7,6 +7,7 @@ import components.ezvalue
 
 class Foo(components.ezvalue.Value):
     """Value object docstring."""
+
     bar = """Docstring 1."""
     baz = """Docstring 2."""
 

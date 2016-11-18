@@ -6,14 +6,19 @@ import components.ezvalue
 
 
 class Foo(components.ezvalue.Value):
-    """Class docstring."""
+    """Value object docstring."""
+
     bar = """Docstring 1."""
     baz = """Docstring 2."""
 
 
 class TestValueObject(util.TestCase):
-    def test_list_fields(self):
-        self.assertCountEqual(Foo._fields, ('bar', 'baz'))
+    def test_direct_instantiation(self):
+        empty_value = components.ezvalue.Value()
+        self.assertCountEqual(empty_value._attributes, [])
+
+    def test_list_attributes(self):
+        self.assertCountEqual(Foo._attributes, ('bar', 'baz'))
 
     def test_init_immutable_with_kwargs(self):
         foo = Foo(bar=1, baz='hi')
@@ -33,3 +38,15 @@ class TestValueObject(util.TestCase):
     def test_instantiate_mutable_class(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
+
+    def test_init_immutable_with_mutable(self):
+        mutable_foo = Foo.Mutable()
+        mutable_foo.bar = 1
+        mutable_foo.baz = 'hi'
+        foo = Foo(mutable_foo)
+        self.assertEqual(foo.bar, 1)
+        self.assertEqual(foo.baz, 'hi')
+
+    #TODO: test overwrite attributes.
+    #TODO: test missing attributes.
+    #TODO: test supplement attributes.
