@@ -7,11 +7,12 @@ class ValueMeta(type):
         attributes -= {'Mutable', 'mutable'}
         cls._attributes = attributes
         cls._MutableValue = MutableValue
+        cls._MutableValue._ImmutableValue = cls
+        cls._MutableValue._attributes = attributes
 
 
 class MutableValue:
-    def __init__(self, cls, source=None, **kwargs):
-        self.mutable_class = cls
+    def __init__(self, source=None, **kwargs):
         if source:
             for name in source._attributes:
                 setattr(self, name, getattr(source, name))
@@ -19,7 +20,15 @@ class MutableValue:
             setattr(self, name, value)
 
     def immutable(self):
-        return self.mutable_class(self)
+        return self._ImmutableValue(self)
+
+    def __eq__(self, other):
+        if type(other) not in (type(self), self._ImmutableValue):
+            return False
+        for name in self._attributes:
+            if getattr(self, name) != getattr(other, name):
+                return False
+        return True
 
 
 class Value(metaclass=ValueMeta):
@@ -96,14 +105,14 @@ class Value(metaclass=ValueMeta):
         
         TODO: detailed description.
         """
-        return cls._MutableValue(cls, source, **kwargs)
+        return cls._MutableValue(source=source, **kwargs)
 
     def mutable(self):
         """Return a mutable copy of the value object.
         
         TODO: detailed description.
         """
-        return self._MutableValue(type(self), self)
+        return self._MutableValue(source=self)
 
     def __eq__(self, other):
         if type(other) not in (type(self), self._MutableValue):

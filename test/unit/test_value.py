@@ -146,6 +146,11 @@ class TestMutableValueObject(unittest.TestCase):
         self.assertEqual(mutable_foo.bar, 1)
         self.assertEqual(mutable_foo.baz, 'hi')
 
+    def test_list_attributes(self):
+        foo = Foo(bar=1, baz='hi')
+        mutable_foo = Foo.Mutable()
+        self.assertCountEqual(mutable_foo._attributes, ('bar', 'baz'))
+
     def test_set_attribute(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
@@ -158,6 +163,18 @@ class TestMutableValueObject(unittest.TestCase):
         foo = mutable_foo.immutable()
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
+
+    def test_compares_equal_values_to_mutable_with_equal_values_returns_true(self):
+        mutable_foo1 = Foo.Mutable(bar=1, baz='hi')
+        mutable_foo2 = Foo.Mutable(bar=1, baz='hi')
+        self.assertTrue(mutable_foo1 == mutable_foo2)
+        self.assertFalse(mutable_foo1 != mutable_foo2)
+
+    def test_compares_inequal_values_to_mutable_with_inequal_values_returns_true(self):
+        mutable_foo1 = Foo.Mutable(bar=1, baz='hi')
+        mutable_foo2 = Foo.Mutable(bar=2, baz='hi')
+        self.assertFalse(mutable_foo1 == mutable_foo2)
+        self.assertTrue(mutable_foo1 != mutable_foo2)
 
     def test_compares_equal_to_immutable_value_with_same_values(self):
         mutable_foo = Foo.Mutable(bar=1, baz='hi')
