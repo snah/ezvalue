@@ -3,7 +3,7 @@ class ValueMeta(type):
     def __init__(cls, name, bases, namespace):
         attributes = {name for name in cls.__dict__
                 if not name.startswith('_')}
-        attributes -= {'Mutable'}
+        attributes -= {'Mutable', 'mutable'}
         cls._attributes = attributes
 
 
@@ -19,7 +19,8 @@ class Value(metaclass=ValueMeta):
     are defined by defining class attributes with the desired names
     in the subclass body. The value of the attributes should be a
     docstring describing the attribute. Valid attribute names are
-    any valid python variable name not starting with an underscore.
+    any valid python variable name not starting with an underscore
+    except the method names defined in the Value class.
 
     Example:
     TODO
@@ -74,23 +75,28 @@ class Value(metaclass=ValueMeta):
                         .format(name))
             setattr(self, name, value)
 
+    class _MutableValue:
+        def __init__(self, cls, source=None, **kwargs):
+            self.mutable_class = cls
+            if source:
+                for name in source._attributes:
+                    setattr(self, name, getattr(source, name))
+            for name, value in kwargs.items():
+                setattr(self, name, value)
+
+        def immutable(self):
+            return self.mutable_class(self)
+
     @classmethod
     def Mutable(cls, source=None, **kwargs):
         """Return an instance of a mutable version of the value object.
         
         TODO: detailed description.
         """
-        class MutableValue:
-            def __init__(self, source=None, **kwargs):
-                if source:
-                    for name in source._attributes:
-                        setattr(self, name, getattr(source, name))
-                for name, value in kwargs.items():
-                    setattr(self, name, value)
+        return cls._MutableValue(cls, source, **kwargs)
 
-            def immutable(self):
-                return cls(self)
-        return MutableValue(source, **kwargs)
+    def mutable(self):
+        return self._MutableValue(type(self), self)
 
     def __eq__(self, other):
         if type(self) != type(other):

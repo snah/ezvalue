@@ -67,6 +67,12 @@ class TestValueObject(unittest.TestCase):
     def test_instantiate_mutable_class(self):
         mutable_foo = Foo.Mutable()
 
+    def test_create_mutable_from_instance(self):
+        foo = Foo(bar=1, baz='hi')
+        mutable_foo = foo.mutable()
+        self.assertEqual(mutable_foo.bar, 1)
+        self.assertEqual(mutable_foo.baz, 'hi')
+
     def test_comparing_values_with_equal_values_returns_true(self):
         foo1 = Foo(bar=1, baz='hi')
         foo2 = Foo(bar=1, baz='hi')
