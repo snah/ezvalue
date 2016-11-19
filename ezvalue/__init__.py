@@ -1,3 +1,4 @@
+import copy
 
 class ValueMeta(type):
     def __init__(cls, name, bases, namespace):
@@ -5,6 +6,20 @@ class ValueMeta(type):
                 if not name.startswith('_')}
         attributes -= {'Mutable', 'mutable'}
         cls._attributes = attributes
+        cls._MutableValue = MutableValue
+
+
+class MutableValue:
+    def __init__(self, cls, source=None, **kwargs):
+        self.mutable_class = cls
+        if source:
+            for name in source._attributes:
+                setattr(self, name, getattr(source, name))
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+    def immutable(self):
+        return self.mutable_class(self)
 
 
 class Value(metaclass=ValueMeta):
@@ -75,18 +90,6 @@ class Value(metaclass=ValueMeta):
                         .format(name))
             setattr(self, name, value)
 
-    class _MutableValue:
-        def __init__(self, cls, source=None, **kwargs):
-            self.mutable_class = cls
-            if source:
-                for name in source._attributes:
-                    setattr(self, name, getattr(source, name))
-            for name, value in kwargs.items():
-                setattr(self, name, value)
-
-        def immutable(self):
-            return self.mutable_class(self)
-
     @classmethod
     def Mutable(cls, source=None, **kwargs):
         """Return an instance of a mutable version of the value object.
@@ -96,10 +99,14 @@ class Value(metaclass=ValueMeta):
         return cls._MutableValue(cls, source, **kwargs)
 
     def mutable(self):
+        """Return a mutable copy of the value object.
+        
+        TODO: detailed description.
+        """
         return self._MutableValue(type(self), self)
 
     def __eq__(self, other):
-        if type(self) != type(other):
+        if type(other) not in (type(self), self._MutableValue):
             return False
         for name in self._attributes:
             if getattr(self, name) != getattr(other, name):

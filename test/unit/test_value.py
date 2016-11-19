@@ -107,7 +107,11 @@ class TestValueObject(unittest.TestCase):
         self.assertTrue(foo != not_foo)
         self.assertTrue(not_foo != foo)
 
-    # TODO: compare to mutable
+    def test_compares_equal_to_mutable_value_with_same_values(self):
+        foo = Foo(bar=1, baz='hi')
+        mutable_foo = foo.mutable()
+        self.assertTrue(foo == mutable_foo)
+        self.assertFalse(foo != mutable_foo)
 
     def test_string_representation(self):
         foo = Foo(bar=1, baz='hi')
@@ -154,3 +158,16 @@ class TestMutableValueObject(unittest.TestCase):
         foo = mutable_foo.immutable()
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
+
+    def test_compares_equal_to_immutable_value_with_same_values(self):
+        mutable_foo = Foo.Mutable(bar=1, baz='hi')
+        foo = mutable_foo.immutable()
+        self.assertTrue(mutable_foo == foo)
+        self.assertFalse(mutable_foo != foo)
+
+    def test_compares_inequal_to_immutable_value_with_different_values(self):
+        mutable_foo = Foo.Mutable(bar=1, baz='hi')
+        foo = mutable_foo.immutable()
+        mutable_foo.bar = 2
+        self.assertFalse(mutable_foo == foo)
+        self.assertTrue(mutable_foo != foo)
