@@ -1,3 +1,4 @@
+import collections
 import unittest
 
 import ezvalue
@@ -65,6 +66,64 @@ class TestValueObject(unittest.TestCase):
 
     def test_instantiate_mutable_class(self):
         mutable_foo = Foo.Mutable()
+
+    def test_comparing_values_with_equal_values_returns_true(self):
+        foo1 = Foo(bar=1, baz='hi')
+        foo2 = Foo(bar=1, baz='hi')
+        self.assertTrue(foo1 == foo2)
+        self.assertFalse(foo1 != foo2)
+
+    def test_comparing_values_with_inequal_values_returns_false(self):
+        foo1 = Foo(bar=1, baz='hi')
+        foo2 = Foo(bar=2, baz='hi')
+        self.assertFalse(foo1 == foo2)
+        self.assertTrue(foo1 != foo2)
+
+    def test_compares_inequal_to_named_tuple(self):
+        foo = Foo(bar=1, baz='hi')
+        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
+        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        self.assertFalse(foo == foo_tuple)
+        self.assertFalse(foo_tuple == foo)
+        self.assertTrue(foo != foo_tuple)
+        self.assertTrue(foo_tuple != foo)
+
+    def test_compares_inequal_to_different_value_object(self):
+        class NotFoo(ezvalue.Value):
+            bar = 'docstring'
+            baz = 'docstring'
+            spam = 'docstring'
+
+        foo = Foo(bar=1, baz='hi')
+        not_foo = NotFoo(bar=1, baz='hi', spam='spam')
+        self.assertFalse(foo == not_foo)
+        self.assertFalse(not_foo == foo)
+        self.assertTrue(foo != not_foo)
+        self.assertTrue(not_foo != foo)
+
+    # TODO: compare to mutable
+
+    def test_string_representation(self):
+        foo = Foo(bar=1, baz='hi')
+        string = str(foo)
+        self.assertIn('Foo', string)
+        self.assertIn('bar=1', string)
+        self.assertIn('baz=hi', string)
+
+    def test_repr(self):
+        foo = Foo(bar=1, baz='hi')
+        string = repr(foo)
+        self.assertIn('Foo', string)
+        self.assertIn('bar=1', string)
+        self.assertIn("baz='hi'", string)
+
+    def test_repr_works_in_exec(self):
+        foo = Foo(bar=1, baz='hi')
+        string = repr(foo)
+        foo2 = eval(string)
+        self.assertEqual(foo2.bar, 1)
+        self.assertEqual(foo2.baz, 'hi')
+
 
 class TestMutableValueObject(unittest.TestCase):
     def test_initialize_with_keyword_argument(self):

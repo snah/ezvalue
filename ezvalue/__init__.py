@@ -74,12 +74,6 @@ class Value(metaclass=ValueMeta):
                         .format(name))
             setattr(self, name, value)
 
-    def __setattr__(self, name, value):
-        if name in self.__dict__ or name not in self._attributes:
-            raise AttributeError()
-        else:
-            super().__setattr__(name, value)
-
     @classmethod
     def Mutable(cls, source=None, **kwargs):
         """Return an instance of a mutable version of the value object.
@@ -97,3 +91,27 @@ class Value(metaclass=ValueMeta):
             def immutable(self):
                 return cls(self)
         return MutableValue(source, **kwargs)
+
+    def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+        for name in self._attributes:
+            if getattr(self, name) != getattr(other, name):
+                return False
+        return True
+
+    def __setattr__(self, name, value):
+        if name in self.__dict__ or name not in self._attributes:
+            raise AttributeError()
+        else:
+            super().__setattr__(name, value)
+
+    def __str__(self):
+        attributes = ','.join('{}={}'.format(name, getattr(self, name))
+                for name in self._attributes)
+        return '{}({})'.format(type(self).__name__, attributes)
+
+    def __repr__(self):
+        attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
+                for name in self._attributes)
+        return '{}({})'.format(type(self).__name__, attributes)
