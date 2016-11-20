@@ -24,6 +24,13 @@ class TestValueObject(unittest.TestCase):
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
 
+    def test_init_with_named_tuple(self):
+        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
+        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        foo = Foo(foo_tuple)
+        self.assertEqual(foo.bar, 1)
+        self.assertEqual(foo.baz, 'hi')
+
     def test_init_immutable_with_mutable(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
@@ -145,6 +152,35 @@ class TestMutableValueObject(unittest.TestCase):
         mutable_foo = Foo.Mutable(foo)
         self.assertEqual(mutable_foo.bar, 1)
         self.assertEqual(mutable_foo.baz, 'hi')
+
+    def test_initialize_with_named_tuple(self):
+        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
+        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        mutable_foo = Foo.Mutable(foo_tuple)
+        self.assertEqual(mutable_foo.bar, 1)
+        self.assertEqual(mutable_foo.baz, 'hi')
+
+    def test_init_ignores_extra_attributes_in_source_object(self):
+        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz', 'spam'))
+        foo_tuple = Foo_tuple(bar=1, baz='hi', spam='spam')
+        mutable_foo = Foo.Mutable(foo_tuple)
+        self.assertEqual(mutable_foo.bar, 1)
+        self.assertEqual(mutable_foo.baz, 'hi')
+        self.assertFalse(hasattr(mutable_foo, 'spam'))
+
+    def test_initialize_with_source_with_missing_attributes(self):
+        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', ))
+        foo_tuple = Foo_tuple(bar=1)
+        mutable_foo = Foo.Mutable(foo_tuple)
+        self.assertEqual(mutable_foo.bar, 1)
+
+    def test_create_two_different_mutable_classes(self):
+        class Foo2(ezvalue.Value):
+            a = """Docstring 1"""
+            b = """Docstring 2"""
+
+        self.assertCountEqual(Foo.Mutable()._attributes, ('bar', 'baz'))
+        self.assertCountEqual(Foo2.Mutable()._attributes, ('a', 'b'))
 
     def test_list_attributes(self):
         foo = Foo(bar=1, baz='hi')
