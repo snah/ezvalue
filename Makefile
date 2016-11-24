@@ -12,4 +12,5 @@ unittest:
 	nose2 test.unit
 
 coverage:
-	nose2 -C  --coverage ezvalue/__init__.py --coverage-report html
+	nose2 test.unit -C  --coverage ezvalue/__init__.py --coverage-report html
+	sed -n 's/.*<span class="pc_cov">\(100%\)<\/span>.*/\nCoverage: \1\n/ p' htmlcov/index.html

@@ -224,3 +224,12 @@ class TestMutableValueObject(unittest.TestCase):
         mutable_foo.bar = 2
         self.assertFalse(mutable_foo == foo)
         self.assertTrue(mutable_foo != foo)
+
+    def test_compares_inequal_to_named_tuple(self):
+        mutable_foo = Foo.Mutable(bar=1, baz='hi')
+        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
+        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        self.assertFalse(mutable_foo == foo_tuple)
+        self.assertFalse(foo_tuple == mutable_foo)
+        self.assertTrue(mutable_foo != foo_tuple)
+        self.assertTrue(foo_tuple != mutable_foo)
