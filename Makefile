@@ -1,7 +1,7 @@
 
 NOSE_OPTIONS = --plugin nose2.plugins.doctests --with-doctest
 
-default: test
+default: coverage lint
 
 clean:
 	find . -name __pycache__ -prune -exec rm -rf {} +
@@ -16,5 +16,12 @@ unittest: FORCE
 coverage: FORCE
 	nose2 $(NOSE_OPTIONS) test.unit -C  --coverage ezvalue/__init__.py --coverage-report html
 	@sed -n 's/.*<span class="pc_cov">\(100%\)<\/span>.*/\nCoverage: \1\n/ p' htmlcov/index.html
+
+lint: fix-whitespace
+	@pylama test --ignore W0612
+	@pylama ezvalue
+
+fix-whitespace: FORCE
+	@find ezvalue test -name '*.py' -exec sed -i 's/^\s\+$$//' {} \;
 
 FORCE:

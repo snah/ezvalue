@@ -60,6 +60,7 @@ class TestValueObject(unittest.TestCase):
 
     def test_unkown_attributes_in_constructor_are_ignored(self):
         foo = Foo(bar=1, baz='hi', unknown='spam')
+        self.assertIsNotNone(foo)
 
     def test_setting_immutables_attribute_raises_exception(self):
         foo = Foo(bar=1, baz='hi')
@@ -200,13 +201,13 @@ class TestMutableValueObject(unittest.TestCase):
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
 
-    def test_compares_equal_values_to_mutable_with_equal_values_returns_true(self):
+    def test_compares_equal_values_to_mutable_with_equal_values(self):
         mutable_foo1 = Foo.Mutable(bar=1, baz='hi')
         mutable_foo2 = Foo.Mutable(bar=1, baz='hi')
         self.assertTrue(mutable_foo1 == mutable_foo2)
         self.assertFalse(mutable_foo1 != mutable_foo2)
 
-    def test_compares_inequal_values_to_mutable_with_inequal_values_returns_true(self):
+    def test_compares_inequal_values_to_mutable_with_inequal_values(self):
         mutable_foo1 = Foo.Mutable(bar=1, baz='hi')
         mutable_foo2 = Foo.Mutable(bar=2, baz='hi')
         self.assertFalse(mutable_foo1 == mutable_foo2)

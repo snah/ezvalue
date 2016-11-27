@@ -6,9 +6,10 @@ it is possible to create a mutable instance of a value object
 when this is required.
 """
 
+
 class ValueMeta(type):
     """Meta class for creating value objects.
-    
+
     The ValueMeta class is responsible for setting several special
     class attributes on a value class. It is the meta class of the
     Value class, so normally the user should not have to specify
@@ -18,7 +19,7 @@ class ValueMeta(type):
     """
     def __init__(cls, name, bases, namespace):
         attributes = {name for name in cls.__dict__
-                if not name.startswith('_')}
+                      if not name.startswith('_')}
         attributes -= {'Mutable', 'mutable'}
         cls._attributes = attributes
 
@@ -32,7 +33,7 @@ class ValueMeta(type):
 
 class _MutableValueBase:
     """Base class for the mutable version of a value.
-    
+
     This is the base class for mutable versions of value objects and
     is not meant to instantiates directly. When defining a new value
     object the Mutable attribute is automatically set to a newly
@@ -41,12 +42,12 @@ class _MutableValueBase:
     A mutable value object has the same attributes as the immutable
     value object it is derived from, however the attributes are
     writable.
-    
+
     Unlike an immutable value object where all the attributes must be
     supplied to the constructor, with a mutable value object it is
     possible to assign only a subset of attributes and assign the rest
     of the attributes later.
-    
+
     Also unlike an immutable value object it is possible to define
     extra attributes like in normal python classes, for example to be
     used as temporary variables. These extra attributes will be
@@ -85,7 +86,7 @@ class _MutableValueBase:
             setattr(self, name, value)
 
     """Create an immutable value object from this mutable instance.
-    
+
     Create an new instance of the complementary (immutable) Value
     class and pass 'self' as the source object. This has the effect
     of returning an immutable version of the object. Keep in mind
@@ -106,7 +107,7 @@ class _MutableValueBase:
 
 class Value(metaclass=ValueMeta):
     '''Subclass this to define a new value object.
-    
+
     The Value class is intended to be subclassed by the user to
     define a new value object. Alternatively the class can be
     instantiated directly to create an empty value object.
@@ -121,7 +122,7 @@ class Value(metaclass=ValueMeta):
 
     Example:
     TODO
-    
+
     Note: If the inherited class specifies a meta class than the
     meta class must inherit from ValueMeta.
 
@@ -138,16 +139,16 @@ class Value(metaclass=ValueMeta):
 
     def __init__(self, source=None, **kwargs):
         """Create from a source object and/or keyword arguments.
-        
+
         If the source argument is given the attributes will be
         initialized from equally named attributes in the source
         object. This for example allows the value object to be
         created from a named tuple. If the source object has fields
         that are not defined in the value object they will be ignored.
-        
+
         Alternatively the objects can be initialized by supplying the
         names and values as keyword arguments.
-        
+
         If both a source object and keyword arguments are given the
         keyword arguments supplement or overwrite the values from the
         source object. This allows the user to create a modified
@@ -159,7 +160,7 @@ class Value(metaclass=ValueMeta):
         in either the source object or the keyword arguments then
         an AttributeError is raised. Extra keyword arguments that
         are not defined in the value object are silently ignored.
-        
+
         TODO: examples.
         """
         for name in self._attributes:
@@ -169,12 +170,12 @@ class Value(metaclass=ValueMeta):
                 value = getattr(source, name)
             else:
                 raise AttributeError("Attribute '{}' not specified."
-                        .format(name))
+                                     .format(name))
             setattr(self, name, value)
 
     def mutable(self):
         """Return a mutable copy of the value object.
-        
+
         Create a new instance of the complementary mutable value
         object and pass 'self' as the source object.
         """
@@ -182,7 +183,7 @@ class Value(metaclass=ValueMeta):
 
     def __eq__(self, other):
         """Test equality to another value object instance.
-        
+
         An instance of a value object is equal to another instance of
         the same value object or it's mutable companion class if and
         only if all attributes compare equal. Any additional
@@ -218,15 +219,15 @@ class Value(metaclass=ValueMeta):
     def __str__(self):
         """Return a string representation of the object."""
         attributes = ','.join('{}={}'.format(name, getattr(self, name))
-                for name in self._attributes)
+                              for name in self._attributes)
         return '{}({})'.format(type(self).__name__, attributes)
 
     def __repr__(self):
         """Return a printable representation of the object.
-        
+
         Generally when passing this representation to the eval
         function it will return a duplicate of the object, however
         this depends on the values of the attributes."""
         attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
-                for name in self._attributes)
+                              for name in self._attributes)
         return '{}({})'.format(type(self).__name__, attributes)
