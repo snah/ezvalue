@@ -1,12 +1,18 @@
-import copy
+"""An elegant and powerfull implementation of a value object.
+
+This module provides base classes to easilly create new value
+objects. Although value objects should in general be immutable
+it is possible to create a mutable instance of a value object
+when this is required.
+"""
 
 class ValueMeta(type):
     """Meta class for creating value objects.
     
     The ValueMeta class is responsible for setting several special
-    class attributes on a value class. It is the metaclass of the
+    class attributes on a value class. It is the meta class of the
     Value class, so normally the user should not have to specify
-    a metaclass when creating their own value objects. However if the
+    a meta class when creating their own value objects. However if the
     user wishes to use their own meta class for a value object they
     must make sure their meta class inherits from this class.
     """
@@ -28,8 +34,8 @@ class _MutableValueBase:
     """Base class for the mutable version of a value.
     
     This is the base class for mutable versions of value objects and
-    is not meant to instatiated directly. When defining a new value
-    object the Mutable attribute is autmatically set to a newly
+    is not meant to instantiates directly. When defining a new value
+    object the Mutable attribute is automatically set to a newly
     created subclass of this base class.
 
     A mutable value object has the same attributes as the immutable
@@ -57,7 +63,7 @@ class _MutableValueBase:
         source object has attributes that are not defined in the
         Value class they are silently ignored.
 
-        If additonal keyword argument are given they will be assigned
+        If additional keyword argument are given they will be assigned
         to the corresponding attributes. Unlike in the Value class
         keywords that do not correspond to defined attributes will be
         added to the class as new attributes. Any attributes that
@@ -66,7 +72,7 @@ class _MutableValueBase:
 
         Contrary to the immutable value object it is not an error if
         not all of the attributes are given, indeed one of the
-        porposes of the mutable version of the value object is to
+        purposes of the mutable version of the value object is to
         allow object creation to happen in stages.
         """
         if source:
@@ -116,15 +122,15 @@ class Value(metaclass=ValueMeta):
     Example:
     TODO
     
-    Note: If the inherited class specifies a metaclass than the
-    metaclass must inherit from ValueMeta.
+    Note: If the inherited class specifies a meta class than the
+    meta class must inherit from ValueMeta.
 
     The resulting value object is in immutable object with the
     specified attributes. Attempting to assign a value to an
     attribute or creating a new attribute will raise an
     AttributeError.
 
-    TODO: summerize functionality.
+    TODO: summarize functionality.
     TODO: document _attributes.
     TODO: methods allowed?
     TODO: append attribute docstrings to class docstring?
@@ -175,6 +181,26 @@ class Value(metaclass=ValueMeta):
         return self.Mutable(source=self)
 
     def __eq__(self, other):
+        """Test equality to another value object instance.
+        
+        An instance of a value object is equal to another instance of
+        the same value object or it's mutable companion class if and
+        only if all attributes compare equal. Any additional
+        attributes in a mutable class are ignored.
+
+        An instance of a value object is never equal to any other
+        type, even if the attributes are the same. To compare to for
+        example a named tuple, first create a new value object from
+        the named tuple:
+
+        >>> import collections
+        >>> class MyValueObject(Value): foo = 'Test attribute'
+        ...
+        >>> my_value = MyValueObject(foo=1)
+        >>> MyNamedTuple = collections.namedtuple('Foo', ('foo'))
+        >>> my_value == MyValueObject(MyNamedTuple(foo=1))
+        True
+        """
         if type(other) not in (type(self), self.Mutable):
             return False
         for name in self._attributes:
@@ -183,17 +209,24 @@ class Value(metaclass=ValueMeta):
         return True
 
     def __setattr__(self, name, value):
+        """Raise AttributeError because object is immutable."""
         if name in self.__dict__ or name not in self._attributes:
             raise AttributeError()
         else:
             super().__setattr__(name, value)
 
     def __str__(self):
+        """Return a string representation of the object."""
         attributes = ','.join('{}={}'.format(name, getattr(self, name))
                 for name in self._attributes)
         return '{}({})'.format(type(self).__name__, attributes)
 
     def __repr__(self):
+        """Return a printable representation of the object.
+        
+        Generally when passing this representation to the eval
+        function it will return a duplicate of the object, however
+        this depends on the values of the attributes."""
         attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
                 for name in self._attributes)
         return '{}({})'.format(type(self).__name__, attributes)
