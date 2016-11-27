@@ -1,4 +1,6 @@
 
+PYTHON_FILES = ezvalue/__init__.py
+
 NOSE_OPTIONS = --plugin nose2.plugins.doctests --with-doctest
 
 default: coverage lint
@@ -18,10 +20,12 @@ coverage: FORCE
 	@sed -n 's/.*<span class="pc_cov">\(100%\)<\/span>.*/\nCoverage: \1\n/ p' htmlcov/index.html
 
 lint: fix-whitespace
-	@pylama test --ignore W0612
-	@pylama ezvalue
+	@pylama test --ignore W0612 || true
+	@pylama ezvalue || true
 
-fix-whitespace: FORCE
-	@find ezvalue test -name '*.py' -exec sed -i 's/^\s\+$$//' {} \;
+%.fixed_whitespace: %
+	@if grep '^\s\+$$' --quiet $<; then sed -i 's/^\s\+$$//' $<; fi
+
+fix-whitespace: $(addsuffix .fixed_whitespace, $(PYTHON_FILES))
 
 FORCE:
