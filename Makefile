@@ -20,7 +20,7 @@ coverage: FORCE
 	@sed -n 's/.*<span class="pc_cov">\(100%\)<\/span>.*/\nCoverage: \1\n/ p' htmlcov/index.html
 
 lint: fix-whitespace
-	@pylama test --ignore W0612 || true
+	@pylama --options=pylama_for_tests.ini test || true
 	@pylama ezvalue || true
 
 %.fixed_whitespace: %
