@@ -19,8 +19,9 @@ class TestValueObject(unittest.TestCase):
         empty_value = ezvalue.Value()
         self.assertCountEqual(empty_value._attributes, [])
 
-    def test_list_attributes(self):
-        self.assertCountEqual(Foo._attributes, ('bar', 'baz'))
+    def test_iterate_attributes(self):
+        foo = Foo(bar=1, baz='hi')
+        self.assertCountEqual(iter(foo), ('bar', 'baz'))
 
     def test_init_immutable_with_kwargs(self):
         # pylint: disable=blacklisted-name
@@ -188,10 +189,10 @@ class TestMutableValueObject(unittest.TestCase):
         self.assertCountEqual(Foo.Mutable()._attributes, ('bar', 'baz'))
         self.assertCountEqual(Foo2.Mutable()._attributes, ('attr1', 'attr2'))
 
-    def test_list_attributes(self):
+    def test_iterate_over_attributes(self):
         foo = Foo(bar=1, baz='hi')
         mutable_foo = Foo.Mutable()
-        self.assertCountEqual(mutable_foo._attributes, ('bar', 'baz'))
+        self.assertCountEqual(iter(mutable_foo), ('bar', 'baz'))
 
     def test_set_attribute(self):
         mutable_foo = Foo.Mutable()

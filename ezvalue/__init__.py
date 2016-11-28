@@ -86,10 +86,14 @@ class _MutableValueBase:
         """
         if not isinstance(other, (type(self), self.Immutable)):
             return False
-        for name in self._attributes:
+        for name in self:
             if getattr(self, name) != getattr(other, name):
                 return False
         return True
+
+    def __iter__(self):
+        """Return an iterable to iterate over the attribute names."""
+        return iter(self._attributes)
 
 
 class ValueMeta(type):
@@ -109,6 +113,7 @@ class ValueMeta(type):
         Set the list of attributes and generate a mutable
         companion class.
         """
+        # pylint: disable = protected-access
         super().__init__(name, bases, namespace)
         attributes = {name for name in cls.__dict__
                       if not name.startswith('_')}
@@ -150,7 +155,6 @@ class Value(metaclass=ValueMeta):
     AttributeError.
 
     TODO: summarize functionality.
-    TODO: document _attributes.
     TODO: methods allowed?
     TODO: append attribute docstrings to class docstring?
     """
@@ -181,7 +185,7 @@ class Value(metaclass=ValueMeta):
 
         TODO: examples.
         """
-        for name in self._attributes:
+        for name in self:
             if name in kwargs:
                 value = kwargs[name]
             elif source:
@@ -222,14 +226,18 @@ class Value(metaclass=ValueMeta):
         """
         if not isinstance(other, (type(self), self.Mutable)):
             return False
-        for name in self._attributes:
+        for name in self:
             if getattr(self, name) != getattr(other, name):
                 return False
         return True
 
+    def __iter__(self):
+        """Return an iterable to iterate over the attribute names."""
+        return iter(self._attributes)
+
     def __setattr__(self, name, value):
         """Raise AttributeError because object is immutable."""
-        if name in self.__dict__ or name not in self._attributes:
+        if name in self.__dict__ or name not in self:
             raise AttributeError()
         else:
             super().__setattr__(name, value)
@@ -237,7 +245,7 @@ class Value(metaclass=ValueMeta):
     def __str__(self):
         """Return a string representation of the object."""
         attributes = ','.join('{}={}'.format(name, getattr(self, name))
-                              for name in self._attributes)
+                              for name in self)
         return '{}({})'.format(type(self).__name__, attributes)
 
     def __repr__(self):
@@ -248,5 +256,5 @@ class Value(metaclass=ValueMeta):
         this depends on the values of the attributes.
         """
         attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
-                              for name in self._attributes)
+                              for name in self)
         return '{}({})'.format(type(self).__name__, attributes)
