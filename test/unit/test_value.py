@@ -1,3 +1,6 @@
+# pylint: disable=blacklisted-name,protected-access,no-self-use
+# pylint: disable=unused-variable,attribute-defined-outside-init
+
 import collections
 import unittest
 
@@ -20,13 +23,14 @@ class TestValueObject(unittest.TestCase):
         self.assertCountEqual(Foo._attributes, ('bar', 'baz'))
 
     def test_init_immutable_with_kwargs(self):
+        # pylint: disable=blacklisted-name
         foo = Foo(bar=1, baz='hi')
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
 
     def test_init_with_named_tuple(self):
-        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
-        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
+        foo_tuple = FooTuple(bar=1, baz='hi')
         foo = Foo(foo_tuple)
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
@@ -95,8 +99,8 @@ class TestValueObject(unittest.TestCase):
 
     def test_compares_inequal_to_named_tuple(self):
         foo = Foo(bar=1, baz='hi')
-        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
-        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
+        foo_tuple = FooTuple(bar=1, baz='hi')
         self.assertFalse(foo == foo_tuple)
         self.assertFalse(foo_tuple == foo)
         self.assertTrue(foo != foo_tuple)
@@ -136,6 +140,7 @@ class TestValueObject(unittest.TestCase):
         self.assertIn("baz='hi'", string)
 
     def test_repr_works_in_exec(self):
+        # pylint: disable = eval-used
         foo = Foo(bar=1, baz='hi')
         string = repr(foo)
         foo2 = eval(string)
@@ -155,33 +160,33 @@ class TestMutableValueObject(unittest.TestCase):
         self.assertEqual(mutable_foo.baz, 'hi')
 
     def test_initialize_with_named_tuple(self):
-        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
-        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
+        foo_tuple = FooTuple(bar=1, baz='hi')
         mutable_foo = Foo.Mutable(foo_tuple)
         self.assertEqual(mutable_foo.bar, 1)
         self.assertEqual(mutable_foo.baz, 'hi')
 
     def test_init_ignores_extra_attributes_in_source_object(self):
-        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz', 'spam'))
-        foo_tuple = Foo_tuple(bar=1, baz='hi', spam='spam')
+        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz', 'spam'))
+        foo_tuple = FooTuple(bar=1, baz='hi', spam='spam')
         mutable_foo = Foo.Mutable(foo_tuple)
         self.assertEqual(mutable_foo.bar, 1)
         self.assertEqual(mutable_foo.baz, 'hi')
         self.assertFalse(hasattr(mutable_foo, 'spam'))
 
     def test_initialize_with_source_with_missing_attributes(self):
-        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', ))
-        foo_tuple = Foo_tuple(bar=1)
+        FooTuple = collections.namedtuple('FooTuple', ('bar', ))
+        foo_tuple = FooTuple(bar=1)
         mutable_foo = Foo.Mutable(foo_tuple)
         self.assertEqual(mutable_foo.bar, 1)
 
     def test_create_two_different_mutable_classes(self):
         class Foo2(ezvalue.Value):
-            a = """Docstring 1"""
-            b = """Docstring 2"""
+            attr1 = """Docstring 1"""
+            attr2 = """Docstring 2"""
 
         self.assertCountEqual(Foo.Mutable()._attributes, ('bar', 'baz'))
-        self.assertCountEqual(Foo2.Mutable()._attributes, ('a', 'b'))
+        self.assertCountEqual(Foo2.Mutable()._attributes, ('attr1', 'attr2'))
 
     def test_list_attributes(self):
         foo = Foo(bar=1, baz='hi')
@@ -228,8 +233,8 @@ class TestMutableValueObject(unittest.TestCase):
 
     def test_compares_inequal_to_named_tuple(self):
         mutable_foo = Foo.Mutable(bar=1, baz='hi')
-        Foo_tuple = collections.namedtuple('Foo_tuple', ('bar', 'baz'))
-        foo_tuple = Foo_tuple(bar=1, baz='hi')
+        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
+        foo_tuple = FooTuple(bar=1, baz='hi')
         self.assertFalse(mutable_foo == foo_tuple)
         self.assertFalse(foo_tuple == mutable_foo)
         self.assertTrue(mutable_foo != foo_tuple)

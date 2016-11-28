@@ -7,30 +7,6 @@ when this is required.
 """
 
 
-class ValueMeta(type):
-    """Meta class for creating value objects.
-
-    The ValueMeta class is responsible for setting several special
-    class attributes on a value class. It is the meta class of the
-    Value class, so normally the user should not have to specify
-    a meta class when creating their own value objects. However if the
-    user wishes to use their own meta class for a value object they
-    must make sure their meta class inherits from this class.
-    """
-    def __init__(cls, name, bases, namespace):
-        attributes = {name for name in cls.__dict__
-                      if not name.startswith('_')}
-        attributes -= {'Mutable', 'mutable'}
-        cls._attributes = attributes
-
-        class SubclassedMutable(_MutableValueBase):
-            pass
-
-        cls.Mutable = SubclassedMutable
-        cls.Mutable.Immutable = cls
-        cls.Mutable._attributes = attributes
-
-
 class _MutableValueBase:
     """Base class for the mutable version of a value.
 
@@ -54,6 +30,7 @@ class _MutableValueBase:
     ignored when creating an immutable value object from the mutable
     value object.
     """
+
     def __init__(self, source=None, **kwargs):
         """Create from a source object and/or keyword arguments.
 
@@ -85,19 +62,29 @@ class _MutableValueBase:
         for name, value in kwargs.items():
             setattr(self, name, value)
 
-    """Create an immutable value object from this mutable instance.
-
-    Create an new instance of the complementary (immutable) Value
-    class and pass 'self' as the source object. This has the effect
-    of returning an immutable version of the object. Keep in mind
-    that any assigned attributes that are not part of the Value's
-    definition will not be part of the returned object.
-    """
     def immutable(self):
+        """Create an immutable value object from this mutable instance.
+
+        Create an new instance of the complementary (immutable) Value
+        class and pass 'self' as the source object. This has the effect
+        of returning an immutable version of the object. Keep in mind
+        that any assigned attributes that are not part of the Value's
+        definition will not be part of the returned object.
+        """
         return self.Immutable(self)
 
     def __eq__(self, other):
-        if type(other) not in (type(self), self.Immutable):
+        """Test equality to another value object instance.
+
+        An instance of a mutable value object is equal to another
+        instance of the same value object or it's immutable companion
+        class if and only if all attributes compare equal. Any
+        additional attributes in a mutable class are ignored.
+
+        An instance of a mutable value object is never equal to any
+        other type, even if the attributes are the same.
+        """
+        if not isinstance(other, (type(self), self.Immutable)):
             return False
         for name in self._attributes:
             if getattr(self, name) != getattr(other, name):
@@ -105,8 +92,39 @@ class _MutableValueBase:
         return True
 
 
+class ValueMeta(type):
+    """Meta class for creating value objects.
+
+    The ValueMeta class is responsible for setting several special
+    class attributes on a value class. It is the meta class of the
+    Value class, so normally the user should not have to specify
+    a meta class when creating their own value objects. However if the
+    user wishes to use their own meta class for a value object they
+    must make sure their meta class inherits from this class.
+    """
+
+    def __init__(cls, name, bases, namespace):
+        """Initialize the class.
+
+        Set the list of attributes and generate a mutable
+        companion class.
+        """
+        super().__init__(name, bases, namespace)
+        attributes = {name for name in cls.__dict__
+                      if not name.startswith('_')}
+        attributes -= {'Mutable', 'mutable'}
+        cls._attributes = attributes
+
+        class SubclassedMutable(_MutableValueBase):
+            pass
+
+        cls.Mutable = SubclassedMutable
+        cls.Mutable.Immutable = cls
+        cls.Mutable._attributes = attributes
+
+
 class Value(metaclass=ValueMeta):
-    '''Subclass this to define a new value object.
+    """Subclass this to define a new value object.
 
     The Value class is intended to be subclassed by the user to
     define a new value object. Alternatively the class can be
@@ -135,7 +153,7 @@ class Value(metaclass=ValueMeta):
     TODO: document _attributes.
     TODO: methods allowed?
     TODO: append attribute docstrings to class docstring?
-    '''
+    """
 
     def __init__(self, source=None, **kwargs):
         """Create from a source object and/or keyword arguments.
@@ -202,7 +220,7 @@ class Value(metaclass=ValueMeta):
         >>> my_value == MyValueObject(MyNamedTuple(foo=1))
         True
         """
-        if type(other) not in (type(self), self.Mutable):
+        if not isinstance(other, (type(self), self.Mutable)):
             return False
         for name in self._attributes:
             if getattr(self, name) != getattr(other, name):
@@ -227,7 +245,8 @@ class Value(metaclass=ValueMeta):
 
         Generally when passing this representation to the eval
         function it will return a duplicate of the object, however
-        this depends on the values of the attributes."""
+        this depends on the values of the attributes.
+        """
         attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
                               for name in self._attributes)
         return '{}({})'.format(type(self).__name__, attributes)

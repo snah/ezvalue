@@ -1,3 +1,5 @@
+# pylint: disable=blacklisted-name
+
 import unittest
 
 import ezvalue
