@@ -7,7 +7,24 @@ when this is required.
 """
 
 
-class _MutableValueBase:
+class _ValueBase:
+    def _is_same_type(self, other, companion_class):
+        return isinstance(other, (type(self), companion_class))
+
+    def _is_equal(self, other, companion_class):
+        if not self._is_same_type(other, companion_class):
+            return False
+        for name in self:
+            if getattr(self, name) != getattr(other, name):
+                return False
+        return True
+
+    def __iter__(self):
+        """Return an iterable with the attribute names."""
+        return iter(self._attributes)
+
+
+class _MutableValueBase(_ValueBase):
     """Base class for the mutable version of a value.
 
     This is the base class for mutable versions of value objects and
@@ -84,16 +101,7 @@ class _MutableValueBase:
         An instance of a mutable value object is never equal to any
         other type, even if the attributes are the same.
         """
-        if not isinstance(other, (type(self), self.Immutable)):
-            return False
-        for name in self:
-            if getattr(self, name) != getattr(other, name):
-                return False
-        return True
-
-    def __iter__(self):
-        """Return an iterable to iterate over the attribute names."""
-        return iter(self._attributes)
+        return self._is_equal(other, self.Immutable)
 
 
 class ValueMeta(type):
@@ -128,7 +136,7 @@ class ValueMeta(type):
         cls.Mutable._attributes = attributes
 
 
-class Value(metaclass=ValueMeta):
+class Value(_ValueBase, metaclass=ValueMeta):
     """Subclass this to define a new value object.
 
     The Value class is intended to be subclassed by the user to
@@ -224,16 +232,7 @@ class Value(metaclass=ValueMeta):
         >>> my_value == MyValueObject(MyNamedTuple(foo=1))
         True
         """
-        if not isinstance(other, (type(self), self.Mutable)):
-            return False
-        for name in self:
-            if getattr(self, name) != getattr(other, name):
-                return False
-        return True
-
-    def __iter__(self):
-        """Return an iterable to iterate over the attribute names."""
-        return iter(self._attributes)
+        return self._is_equal(other, self.Mutable)
 
     def __setattr__(self, name, value):
         """Raise AttributeError because object is immutable."""

@@ -14,92 +14,69 @@ class Foo(ezvalue.Value):
     baz = """Docstring 2."""
 
 
-class TestValueObject(unittest.TestCase):
-    def test_direct_instantiation(self):
-        empty_value = ezvalue.Value()
-        self.assertCountEqual(empty_value._attributes, [])
-
-    def test_iterate_attributes(self):
-        foo = Foo(bar=1, baz='hi')
-        self.assertCountEqual(iter(foo), ('bar', 'baz'))
-
-    def test_init_immutable_with_kwargs(self):
+class _TestValueObjetBase:
+    # pylint: disable = no-member
+    def test_init_with_kwargs(self):
         # pylint: disable=blacklisted-name
-        foo = Foo(bar=1, baz='hi')
-        self.assertEqual(foo.bar, 1)
-        self.assertEqual(foo.baz, 'hi')
+        foo = self.CUT(bar=1, baz='hi')
+        self.assert_attribute_values_equal(foo, 1, 'hi')
 
     def test_init_with_named_tuple(self):
         FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
         foo_tuple = FooTuple(bar=1, baz='hi')
-        foo = Foo(foo_tuple)
-        self.assertEqual(foo.bar, 1)
-        self.assertEqual(foo.baz, 'hi')
+        foo = self.CUT(foo_tuple)
+        self.assert_attribute_values_equal(foo, 1, 'hi')
 
-    def test_init_immutable_with_mutable(self):
+    def test_init_from_mutable(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
         mutable_foo.baz = 'hi'
-        foo = Foo(mutable_foo)
-        self.assertEqual(foo.bar, 1)
-        self.assertEqual(foo.baz, 'hi')
+        foo = self.CUT(mutable_foo)
+        self.assert_attribute_values_equal(foo, 1, 'hi')
+
+    def test_init_from_immutable(self):
+        immutable_foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(immutable_foo)
+        self.assert_attribute_values_equal(foo, 1, 'hi')
 
     def test_kwargs_overwrite_source_object_values(self):
-        mutable_foo = Foo.Mutable()
-        mutable_foo.bar = 1
-        mutable_foo.baz = 'hi'
-        foo = Foo(mutable_foo, baz='bye')
-        self.assertEqual(foo.bar, 1)
-        self.assertEqual(foo.baz, 'bye')
+        source_foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(source_foo, baz='bye')
+        self.assert_attribute_values_equal(foo, 1, 'bye')
 
     def test_supplement_attributes_with_kwargs(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
-        foo = Foo(mutable_foo, baz='bye')
-        self.assertEqual(foo.bar, 1)
-        self.assertEqual(foo.baz, 'bye')
-
-    def test_missing_attributes_in_constructor_raises_attribute_error(self):
-        with self.assertRaisesRegex(AttributeError, 'baz'):
-            foo = Foo(bar=2)
+        foo = self.CUT(mutable_foo, baz='bye')
+        self.assert_attribute_values_equal(foo, 1, 'bye')
 
     def test_unkown_attributes_in_constructor_are_ignored(self):
-        foo = Foo(bar=1, baz='hi', unknown='spam')
-        self.assertIsNotNone(foo)
+        foo = self.CUT(bar=1, baz='hi', unknown='spam')
 
-    def test_setting_immutables_attribute_raises_exception(self):
-        foo = Foo(bar=1, baz='hi')
-        with self.assertRaises(AttributeError):
-            foo.bar = 3
+    def test_iterate_over_attributes(self):
+        foo = self.CUT(bar=1, baz='hi')
+        self.assertCountEqual(iter(foo), ('bar', 'baz'))
 
-    def test_non_extisting_attribute_raises_exception(self):
-        foo = Foo(bar=1, baz='hi')
-        with self.assertRaises(AttributeError):
-            foo.non_existing = 'hi'
+    def test_compares_equal_to_mutable_with_equal_values(self):
+        foo = self.CUT(bar=1, baz='hi')
+        mutable_foo = Foo.Mutable(bar=1, baz='hi')
+        self.assertTrue(foo == mutable_foo)
+        self.assertFalse(foo != mutable_foo)
 
-    def test_instantiate_mutable_class(self):
-        mutable_foo = Foo.Mutable()
+    def test_compares_equal_to_immutable_value_with_equal_values(self):
+        foo = self.CUT(bar=1, baz='hi')
+        immutable_foo = Foo(bar=1, baz='hi')
+        self.assertTrue(foo == immutable_foo)
+        self.assertFalse(foo != immutable_foo)
 
-    def test_create_mutable_from_instance(self):
-        foo = Foo(bar=1, baz='hi')
-        mutable_foo = foo.mutable()
-        self.assertEqual(mutable_foo.bar, 1)
-        self.assertEqual(mutable_foo.baz, 'hi')
-
-    def test_comparing_values_with_equal_values_returns_true(self):
-        foo1 = Foo(bar=1, baz='hi')
-        foo2 = Foo(bar=1, baz='hi')
-        self.assertTrue(foo1 == foo2)
-        self.assertFalse(foo1 != foo2)
-
-    def test_comparing_values_with_inequal_values_returns_false(self):
-        foo1 = Foo(bar=1, baz='hi')
-        foo2 = Foo(bar=2, baz='hi')
+    def test_compares_inequal_when_inequal_values(self):
+        foo1 = self.CUT(bar=1, baz='hi')
+        foo2 = self.CUT(bar=2, baz='hi')
         self.assertFalse(foo1 == foo2)
         self.assertTrue(foo1 != foo2)
 
     def test_compares_inequal_to_named_tuple(self):
-        foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(bar=1, baz='hi')
         FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
         foo_tuple = FooTuple(bar=1, baz='hi')
         self.assertFalse(foo == foo_tuple)
@@ -113,28 +90,54 @@ class TestValueObject(unittest.TestCase):
             baz = 'docstring'
             spam = 'docstring'
 
-        foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(bar=1, baz='hi')
         not_foo = NotFoo(bar=1, baz='hi', spam='spam')
         self.assertFalse(foo == not_foo)
         self.assertFalse(not_foo == foo)
         self.assertTrue(foo != not_foo)
         self.assertTrue(not_foo != foo)
 
-    def test_compares_equal_to_mutable_value_with_same_values(self):
+    def assert_attribute_values_equal(self, foo, bar, baz):
+        """Assert that the attribute values are equal to those given."""
+        self.assertEqual(foo.bar, bar)
+        self.assertEqual(foo.baz, baz)
+
+
+class TestValueObject(unittest.TestCase, _TestValueObjetBase):
+    CUT = Foo   # Class Under Test
+
+    def test_direct_instantiation(self):
+        empty_value = ezvalue.Value()
+        self.assertCountEqual(empty_value._attributes, [])
+
+    def test_missing_attributes_in_constructor_raises_attribute_error(self):
+        with self.assertRaisesRegex(AttributeError, 'baz'):
+            foo = Foo(bar=2)
+
+    def test_setting_attribute_raises_exception(self):
+        foo = Foo(bar=1, baz='hi')
+        with self.assertRaises(AttributeError):
+            foo.bar = 3
+
+    def test_non_extisting_attribute_raises_exception(self):
+        foo = Foo(bar=1, baz='hi')
+        with self.assertRaises(AttributeError):
+            foo.non_existing = 'hi'
+
+    def test_create_mutable_from_instance(self):
         foo = Foo(bar=1, baz='hi')
         mutable_foo = foo.mutable()
-        self.assertTrue(foo == mutable_foo)
-        self.assertFalse(foo != mutable_foo)
+        self.assert_attribute_values_equal(mutable_foo, 1, 'hi')
 
     def test_string_representation(self):
-        foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(bar=1, baz='hi')
         string = str(foo)
         self.assertIn('Foo', string)
         self.assertIn('bar=1', string)
         self.assertIn('baz=hi', string)
 
     def test_repr(self):
-        foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(bar=1, baz='hi')
         string = repr(foo)
         self.assertIn('Foo', string)
         self.assertIn('bar=1', string)
@@ -142,30 +145,19 @@ class TestValueObject(unittest.TestCase):
 
     def test_repr_works_in_exec(self):
         # pylint: disable = eval-used
-        foo = Foo(bar=1, baz='hi')
+        foo = self.CUT(bar=1, baz='hi')
         string = repr(foo)
         foo2 = eval(string)
         self.assertEqual(foo2.bar, 1)
         self.assertEqual(foo2.baz, 'hi')
 
 
-class TestMutableValueObject(unittest.TestCase):
-    def test_initialize_with_keyword_argument(self):
-        mutable_foo = Foo.Mutable(bar=1)
-        self.assertEqual(mutable_foo.bar, 1)
+class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
+    CUT = Foo.Mutable   # Class Under Test
 
-    def test_initialize_with_value_object(self):
-        foo = Foo(bar=1, baz='hi')
-        mutable_foo = Foo.Mutable(foo)
-        self.assertEqual(mutable_foo.bar, 1)
-        self.assertEqual(mutable_foo.baz, 'hi')
-
-    def test_initialize_with_named_tuple(self):
-        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
-        foo_tuple = FooTuple(bar=1, baz='hi')
-        mutable_foo = Foo.Mutable(foo_tuple)
-        self.assertEqual(mutable_foo.bar, 1)
-        self.assertEqual(mutable_foo.baz, 'hi')
+    def test_missing_kwargs_does_not_raise_exception(self):
+        foo = self.CUT(bar=1)
+        self.assertEqual(foo.bar, 1)
 
     def test_init_ignores_extra_attributes_in_source_object(self):
         FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz', 'spam'))
@@ -182,6 +174,7 @@ class TestMutableValueObject(unittest.TestCase):
         self.assertEqual(mutable_foo.bar, 1)
 
     def test_create_two_different_mutable_classes(self):
+        # Testing because the mutable class is created dynamically.
         class Foo2(ezvalue.Value):
             attr1 = """Docstring 1"""
             attr2 = """Docstring 2"""
@@ -189,54 +182,20 @@ class TestMutableValueObject(unittest.TestCase):
         self.assertCountEqual(Foo.Mutable()._attributes, ('bar', 'baz'))
         self.assertCountEqual(Foo2.Mutable()._attributes, ('attr1', 'attr2'))
 
-    def test_iterate_over_attributes(self):
-        foo = Foo(bar=1, baz='hi')
-        mutable_foo = Foo.Mutable()
-        self.assertCountEqual(iter(mutable_foo), ('bar', 'baz'))
-
     def test_set_attribute(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
         self.assertEqual(mutable_foo.bar, 1)
 
-    def test_create_immutable(self):
+    def test_set_non_existing_attribute(self):
+        mutable_foo = Foo.Mutable()
+        mutable_foo.spam = 3
+        self.assertEqual(mutable_foo.spam, 3)
+
+    def test_create_immutable_from_instance(self):
         mutable_foo = Foo.Mutable()
         mutable_foo.bar = 1
         mutable_foo.baz = 'hi'
         foo = mutable_foo.immutable()
         self.assertEqual(foo.bar, 1)
         self.assertEqual(foo.baz, 'hi')
-
-    def test_compares_equal_values_to_mutable_with_equal_values(self):
-        mutable_foo1 = Foo.Mutable(bar=1, baz='hi')
-        mutable_foo2 = Foo.Mutable(bar=1, baz='hi')
-        self.assertTrue(mutable_foo1 == mutable_foo2)
-        self.assertFalse(mutable_foo1 != mutable_foo2)
-
-    def test_compares_inequal_values_to_mutable_with_inequal_values(self):
-        mutable_foo1 = Foo.Mutable(bar=1, baz='hi')
-        mutable_foo2 = Foo.Mutable(bar=2, baz='hi')
-        self.assertFalse(mutable_foo1 == mutable_foo2)
-        self.assertTrue(mutable_foo1 != mutable_foo2)
-
-    def test_compares_equal_to_immutable_value_with_same_values(self):
-        mutable_foo = Foo.Mutable(bar=1, baz='hi')
-        foo = mutable_foo.immutable()
-        self.assertTrue(mutable_foo == foo)
-        self.assertFalse(mutable_foo != foo)
-
-    def test_compares_inequal_to_immutable_value_with_different_values(self):
-        mutable_foo = Foo.Mutable(bar=1, baz='hi')
-        foo = mutable_foo.immutable()
-        mutable_foo.bar = 2
-        self.assertFalse(mutable_foo == foo)
-        self.assertTrue(mutable_foo != foo)
-
-    def test_compares_inequal_to_named_tuple(self):
-        mutable_foo = Foo.Mutable(bar=1, baz='hi')
-        FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz'))
-        foo_tuple = FooTuple(bar=1, baz='hi')
-        self.assertFalse(mutable_foo == foo_tuple)
-        self.assertFalse(foo_tuple == mutable_foo)
-        self.assertTrue(mutable_foo != foo_tuple)
-        self.assertTrue(foo_tuple != mutable_foo)
