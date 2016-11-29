@@ -23,6 +23,31 @@ class _ValueBase:
         """Return an iterable with the attribute names."""
         return iter(self._attributes)
 
+    def __str__(self):
+        """Return a string representation of the object."""
+        attributes = ','.join('{}={}'.format(name, getattr(self, name))
+                              for name in self)
+        return '{}({})'.format(type(self).__name__, attributes)
+
+    def __repr__(self):
+        """Return a printable representation of the object.
+
+        Generally when passing this representation to the eval
+        function it will return a duplicate of the object, however
+        this depends on the values of the attributes.
+        """
+        attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
+                              for name in self)
+        return '{}({})'.format(type(self).__name__, attributes)
+
+    def __hash__(self):
+        """Return a hash of the values.
+
+        The hash is computed by putting the values of the attributes
+        in a hash and calculating the hash of that tuple.
+        """
+        return hash(tuple(getattr(self, attr) for attr in self))
+
 
 class _MutableValueBase(_ValueBase):
     """Base class for the mutable version of a value.
@@ -103,6 +128,8 @@ class _MutableValueBase(_ValueBase):
         """
         return self._is_equal(other, self.Immutable)
 
+    __hash__ = _ValueBase.__hash__
+
 
 class ValueMeta(type):
     """Meta class for creating value objects.
@@ -132,6 +159,7 @@ class ValueMeta(type):
             pass
 
         cls.Mutable = SubclassedMutable
+        cls.Mutable.__name__ = 'Mutable' + name
         cls.Mutable.Immutable = cls
         cls.Mutable._attributes = attributes
 
@@ -234,26 +262,11 @@ class Value(_ValueBase, metaclass=ValueMeta):
         """
         return self._is_equal(other, self.Mutable)
 
+    __hash__ = _ValueBase.__hash__
+
     def __setattr__(self, name, value):
         """Raise AttributeError because object is immutable."""
         if name in self.__dict__ or name not in self:
             raise AttributeError()
         else:
             super().__setattr__(name, value)
-
-    def __str__(self):
-        """Return a string representation of the object."""
-        attributes = ','.join('{}={}'.format(name, getattr(self, name))
-                              for name in self)
-        return '{}({})'.format(type(self).__name__, attributes)
-
-    def __repr__(self):
-        """Return a printable representation of the object.
-
-        Generally when passing this representation to the eval
-        function it will return a duplicate of the object, however
-        this depends on the values of the attributes.
-        """
-        attributes = ','.join('{}={}'.format(name, repr(getattr(self, name)))
-                              for name in self)
-        return '{}({})'.format(type(self).__name__, attributes)

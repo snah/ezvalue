@@ -57,6 +57,11 @@ class _TestValueObjetBase:
         foo = self.CUT(bar=1, baz='hi')
         self.assertCountEqual(iter(foo), ('bar', 'baz'))
 
+    def test_contains_attributes(self):
+        foo = self.CUT(bar=1, baz='hi')
+        self.assertTrue('bar' in foo)
+        self.assertFalse('spam' in foo)
+
     def test_compares_equal_to_mutable_with_equal_values(self):
         foo = self.CUT(bar=1, baz='hi')
         mutable_foo = Foo.Mutable(bar=1, baz='hi')
@@ -97,6 +102,42 @@ class _TestValueObjetBase:
         self.assertTrue(foo != not_foo)
         self.assertTrue(not_foo != foo)
 
+    def test_string_representation(self):
+        foo = self.CUT(bar=1, baz='hi')
+        string = str(foo)
+        self.assertIn(self.class_name, string)
+        self.assertIn('bar=1', string)
+        self.assertIn('baz=hi', string)
+
+    def test_repr(self):
+        foo = self.CUT(bar=1, baz='hi')
+        string = repr(foo)
+        self.assertIn(self.class_name, string)
+        self.assertIn('bar=1', string)
+        self.assertIn("baz='hi'", string)
+
+    def test_repr_works_in_exec(self):
+        # pylint: disable = eval-used
+        foo = self.CUT(bar=1, baz='hi')
+        string = repr(foo)
+        foo2 = eval(string, {self.class_name: self.CUT})
+        self.assertEqual(foo2.bar, 1)
+        self.assertEqual(foo2.baz, 'hi')
+
+    def test_hash_differs_when_different_values(self):
+        foo1 = self.CUT(bar=1, baz='hi')
+        foo2 = self.CUT(bar=2, baz='hi')
+        self.assertNotEqual(hash(foo1), hash(foo2))
+
+    def test_hash_equal_for_same_values(self):
+        foo1 = self.CUT(bar=1, baz='hi')
+        foo2 = self.CUT(bar=1, baz='hi')
+        self.assertEqual(hash(foo1), hash(foo2))
+
+    def test_hash_when_mutable_values(self):
+        foo = Foo(bar=1, baz=[1, 2])
+        self.assertIsNotNone(foo)
+
     def assert_attribute_values_equal(self, foo, bar, baz):
         """Assert that the attribute values are equal to those given."""
         self.assertEqual(foo.bar, bar)
@@ -105,6 +146,7 @@ class _TestValueObjetBase:
 
 class TestValueObject(unittest.TestCase, _TestValueObjetBase):
     CUT = Foo   # Class Under Test
+    class_name = 'Foo'
 
     def test_direct_instantiation(self):
         empty_value = ezvalue.Value()
@@ -113,6 +155,11 @@ class TestValueObject(unittest.TestCase, _TestValueObjetBase):
     def test_missing_attributes_in_constructor_raises_attribute_error(self):
         with self.assertRaisesRegex(AttributeError, 'baz'):
             foo = Foo(bar=2)
+
+    def test_create_mutable_from_instance(self):
+        foo = Foo(bar=1, baz='hi')
+        mutable_foo = foo.mutable()
+        self.assert_attribute_values_equal(mutable_foo, 1, 'hi')
 
     def test_setting_attribute_raises_exception(self):
         foo = Foo(bar=1, baz='hi')
@@ -124,36 +171,15 @@ class TestValueObject(unittest.TestCase, _TestValueObjetBase):
         with self.assertRaises(AttributeError):
             foo.non_existing = 'hi'
 
-    def test_create_mutable_from_instance(self):
+    def test_delete_attribute_raises_exception(self):
         foo = Foo(bar=1, baz='hi')
-        mutable_foo = foo.mutable()
-        self.assert_attribute_values_equal(mutable_foo, 1, 'hi')
-
-    def test_string_representation(self):
-        foo = self.CUT(bar=1, baz='hi')
-        string = str(foo)
-        self.assertIn('Foo', string)
-        self.assertIn('bar=1', string)
-        self.assertIn('baz=hi', string)
-
-    def test_repr(self):
-        foo = self.CUT(bar=1, baz='hi')
-        string = repr(foo)
-        self.assertIn('Foo', string)
-        self.assertIn('bar=1', string)
-        self.assertIn("baz='hi'", string)
-
-    def test_repr_works_in_exec(self):
-        # pylint: disable = eval-used
-        foo = self.CUT(bar=1, baz='hi')
-        string = repr(foo)
-        foo2 = eval(string)
-        self.assertEqual(foo2.bar, 1)
-        self.assertEqual(foo2.baz, 'hi')
+        with self.assertRaises(AttributeError):
+            del foo.non_existing
 
 
 class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
     CUT = Foo.Mutable   # Class Under Test
+    class_name = 'MutableFoo'
 
     def test_missing_kwargs_does_not_raise_exception(self):
         foo = self.CUT(bar=1)
@@ -162,16 +188,16 @@ class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
     def test_init_ignores_extra_attributes_in_source_object(self):
         FooTuple = collections.namedtuple('FooTuple', ('bar', 'baz', 'spam'))
         foo_tuple = FooTuple(bar=1, baz='hi', spam='spam')
-        mutable_foo = Foo.Mutable(foo_tuple)
-        self.assertEqual(mutable_foo.bar, 1)
-        self.assertEqual(mutable_foo.baz, 'hi')
-        self.assertFalse(hasattr(mutable_foo, 'spam'))
+        foo = Foo.Mutable(foo_tuple)
+        self.assertEqual(foo.bar, 1)
+        self.assertEqual(foo.baz, 'hi')
+        self.assertFalse(hasattr(foo, 'spam'))
 
     def test_initialize_with_source_with_missing_attributes(self):
         FooTuple = collections.namedtuple('FooTuple', ('bar', ))
         foo_tuple = FooTuple(bar=1)
-        mutable_foo = Foo.Mutable(foo_tuple)
-        self.assertEqual(mutable_foo.bar, 1)
+        foo = Foo.Mutable(foo_tuple)
+        self.assertEqual(foo.bar, 1)
 
     def test_create_two_different_mutable_classes(self):
         # Testing because the mutable class is created dynamically.
@@ -183,19 +209,19 @@ class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
         self.assertCountEqual(Foo2.Mutable()._attributes, ('attr1', 'attr2'))
 
     def test_set_attribute(self):
-        mutable_foo = Foo.Mutable()
-        mutable_foo.bar = 1
-        self.assertEqual(mutable_foo.bar, 1)
+        foo = Foo.Mutable()
+        foo.bar = 1
+        self.assertEqual(foo.bar, 1)
 
     def test_set_non_existing_attribute(self):
-        mutable_foo = Foo.Mutable()
-        mutable_foo.spam = 3
-        self.assertEqual(mutable_foo.spam, 3)
+        foo = Foo.Mutable()
+        foo.spam = 3
+        self.assertEqual(foo.spam, 3)
 
     def test_create_immutable_from_instance(self):
-        mutable_foo = Foo.Mutable()
-        mutable_foo.bar = 1
-        mutable_foo.baz = 'hi'
-        foo = mutable_foo.immutable()
-        self.assertEqual(foo.bar, 1)
-        self.assertEqual(foo.baz, 'hi')
+        foo = Foo.Mutable()
+        foo.bar = 1
+        foo.baz = 'hi'
+        immutable_foo = foo.immutable()
+        self.assertEqual(immutable_foo.bar, 1)
+        self.assertEqual(immutable_foo.baz, 'hi')
