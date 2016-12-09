@@ -5,8 +5,7 @@ Introduction
 ezvalue (pronounced 'easy value') provides an elegant yet powerful
 implementation of value objects.
 
-=============
-Value Objects
+Value objects
 =============
 
 A value object is a *simple* *immutable* object whose equality is based on
@@ -29,14 +28,23 @@ Immutable:
     objects.
 
 The Python Standard Library defines various value objects out of box like int,
-float, tuple and string.
+float, tuple and string. However there is no elegant way of defining your own
+value objects in python. There is collections.NamedTuple, but the syntax can
+hardly be called elegant, especially with more than two or three attributes.
 
-========================
-Example of using ezvalue
-========================
+Value objects with ezvalue
+==========================
 
-TODO
+The ezvalue library lets the user define new value objects by creating a
+subclass and defining class attributes. The resulting value object can be used
+similarly to a named tuple, but has additional features. For example ezvalue
+value object have more flexible constructors an it is possible to create a
+mutable copy of the value object.
+
+The :doc:`tutorial` provides an introduction on how to use ezvalue objects.
+
 
 .. rubric:: Footnotes
 
-.. [#wiki_value_object]  Paraphrased from `wikipedia <https://en.wikipedia.org/wiki/Value_object>`_.
+.. [#wiki_value_object]  Paraphrased from `wikipedia
+    <https://en.wikipedia.org/wiki/Value_object>`_.

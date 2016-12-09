@@ -8,6 +8,10 @@ default: coverage lint
 clean:
 	find . -name __pycache__ -prune -exec rm -rf {} +
 	rm -rf .coverage htmlcov
+	rm -rf docs/_build/*
+
+docs: FORCE
+	sphinx-build -b html docs/ docs/_build/
 
 travis_test: FORCE
 	nose2 $(NOSE_OPTIONS) -C --coverage ezvalue/__init__.py
