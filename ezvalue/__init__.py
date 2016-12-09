@@ -165,7 +165,7 @@ class ValueMeta(type):
 
 
 class Value(_ValueBase, metaclass=ValueMeta):
-    """Subclass this to define a new value object.
+    '''Subclass this to define a new value object.
 
     The Value class is intended to be subclassed by the user to
     define a new value object. Alternatively the class can be
@@ -179,21 +179,23 @@ class Value(_ValueBase, metaclass=ValueMeta):
     any valid python variable name not starting with an underscore
     except 'Mutable', 'mutable', 'Immutable' and 'immutable'.
 
-    Example:
-    TODO
+    Example::
+
+       class Point(ezvalue.Value):
+           """Defines a cartesian point in 2D space."""
+
+           x = """The x-coordinate in meters."""
+           y = """The y-coordinate in meters."""
+
 
     Note: If the inherited class specifies a meta class than the
     meta class must inherit from ValueMeta.
 
-    The resulting value object is in immutable object with the
+    The resulting value object is an immutable object with the
     specified attributes. Attempting to assign a value to an
     attribute or creating a new attribute will raise an
     AttributeError.
-
-    TODO: summarize functionality.
-    TODO: methods allowed?
-    TODO: append attribute docstrings to class docstring?
-    """
+    '''
 
     def __init__(self, source=None, **kwargs):
         """Create from a source object and/or keyword arguments.
@@ -218,8 +220,6 @@ class Value(_ValueBase, metaclass=ValueMeta):
         in either the source object or the keyword arguments then
         an AttributeError is raised. Extra keyword arguments that
         are not defined in the value object are silently ignored.
-
-        TODO: examples.
         """
         for name in self:
             if name in kwargs:

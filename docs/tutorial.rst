@@ -6,13 +6,14 @@ This document is intended as a quick introduction to creating and
 using ezvalue value objects. After going through this tutorial you
 will be able to effectively use ezvalue value objects and understand
 code that uses them.
+
 .. TODO: Add links to API doc and mention them here.
 .. TODO: Add estimated time to go through tutorial.
 
 Creating value objects
 ======================
 
-New value objects are created by subclassing ezvalue.Value::
+New value objects are created by subclassing :class:`ezvalue.Value`::
 
     import ezvalue
     class Point(ezvalue.Value):
@@ -56,7 +57,8 @@ the values of the source object.
 Equality of value objects
 =========================
 
-Equality of value objects is based on their value::
+:meth:`Equality <ezvalue.Value.__eq__>` of value objects is based on their
+value::
 
     >>> my_point == Point(x=1, y=13)
     True
@@ -99,14 +101,16 @@ defined above it would raise an AttributeError::
         raise AttributeError()
     AttributeError
 
-However you can create a mutable copy of the object and pass that to the function::
+However you can create a :meth:`mutable <ezvalue.Value.mutable>` copy of the
+object and pass that to the function::
 
     >>> my_mutable_point = my_point.mutable()
     >>> invert_x(my_mutable_point)
     >>> my_mutable_point
     MutablePoint(x=-1,y=13)
 
-The mutable point can easily be converted back to an immutable object::
+The mutable point can easily be converted back to an
+:meth:`immutable <ezvalue._MutableValueBase.immutable>` object::
 
     >>> my_mutable_point.immutable()
     Point(x=0,y=13)
