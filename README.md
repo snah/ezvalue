@@ -13,5 +13,5 @@ clones or a mutable version.
 ## Documentation
 
 The documentation can be found on
-[Read the Docs](https://readthedocs.org/projects/ezvalue). A good place to start
+[Read the Docs](http://ezvalue.readthedocs.io/en/latest/). A good place to start
 is the [tutorial](http://ezvalue.readthedocs.io/en/latest/tutorial.html).
