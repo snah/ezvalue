@@ -6,3 +6,5 @@ tmp
 .coverage
 htmlcov/
 docs/_build/
+dist
+ezvalue.egg-info/
