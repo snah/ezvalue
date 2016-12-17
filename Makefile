@@ -14,7 +14,7 @@ docs: FORCE
 	sphinx-build -b html docs/ docs/_build/
 
 travis_test: FORCE
-	nose2 $(NOSE_OPTIONS) -C --coverage ezvalue/__init__.py
+	nose2 $(NOSE_OPTIONS) -C --coverage ezvalue/__init__.py test
 
 test: FORCE
 	nose2 $(NOSE_OPTIONS) test
