@@ -9,6 +9,9 @@ clean:
 	find . -name __pycache__ -prune -exec rm -rf {} +
 	rm -rf .coverage htmlcov
 	rm -rf docs/_build/*
+	rm -rf build
+	rm -rf dist
+	rm -rf ezvalue.egg-info
 
 docs: FORCE
 	sphinx-build -b html docs/ docs/_build/
@@ -25,6 +28,10 @@ unittest: FORCE
 coverage: FORCE
 	nose2 $(NOSE_OPTIONS) test.unit -C  --coverage ezvalue/__init__.py --coverage-report html
 	@sed -n 's/.*<span class="pc_cov">\(100%\)<\/span>.*/\nCoverage: \1\n/ p' htmlcov/index.html
+
+pypytest: clean FORCE
+	python setup.py bdist_wheel
+	twine upload dist/* -r testpypi
 
 lint: fix-whitespace
 	@pylama --options=pylama_for_tests.ini test || true

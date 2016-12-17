@@ -101,16 +101,16 @@ defined above it would raise an AttributeError::
         raise AttributeError()
     AttributeError
 
-However you can create a :meth:`mutable <ezvalue.Value.mutable>` copy of the
-object and pass that to the function::
+However you can create a mutable copy of the object with the :meth:`to_mutable
+<ezvalue.Value.to_mutable>` method and pass that to the function::
 
     >>> my_mutable_point = my_point.mutable()
     >>> invert_x(my_mutable_point)
     >>> my_mutable_point
     MutablePoint(x=-1,y=13)
 
-The mutable point can easily be converted back to an
-:meth:`immutable <ezvalue._MutableValueBase.immutable>` object::
+The mutable point can easily be converted back to an immutable object using the
+:meth:`to_immutable <ezvalue._MutableValueBase.to_immutable>` method::
 
     >>> my_mutable_point.immutable()
     Point(x=0,y=13)

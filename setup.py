@@ -7,7 +7,7 @@ with open(readme_path, encoding='utf-8') as f:
     long_description = f.read()
 
 setuptools.setup(name='ezvalue',
-    version='0.1',
+    version='0.1.1',
     description='An elegant and powerfull implementation of a value object.',
     long_description=long_description,
     
