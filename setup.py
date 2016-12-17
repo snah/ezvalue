@@ -16,13 +16,12 @@ setuptools.setup(name='ezvalue',
     author='Hans Maree',
     author_email='hans.maree@gmail.com',
     
-    licence='MIT',
+    license='MIT',
     
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Topic :: Software Development',
-        'Licence :: OSI Approved :: MIT Licence',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
