@@ -23,7 +23,7 @@ class TestValueObject(unittest.TestCase):
     def test_construct_mutable_to_send_immutable(self):
         mutable_foo = Foo.Mutable(bar=1, baz='hi')
         mutable_foo.bar = 2
-        foo = mutable_foo.immutable()
+        foo = mutable_foo.to_immutable()
         self.assertEqual(foo.bar, 2)
         self.assertEqual(foo.baz, 'hi')
         with self.assertRaises(AttributeError):

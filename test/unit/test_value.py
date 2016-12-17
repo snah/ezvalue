@@ -158,7 +158,7 @@ class TestValueObject(unittest.TestCase, _TestValueObjetBase):
 
     def test_create_mutable_from_instance(self):
         foo = Foo(bar=1, baz='hi')
-        mutable_foo = foo.mutable()
+        mutable_foo = foo.to_mutable()
         self.assert_attribute_values_equal(mutable_foo, 1, 'hi')
 
     def test_setting_attribute_raises_exception(self):
@@ -222,6 +222,6 @@ class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
         foo = Foo.Mutable()
         foo.bar = 1
         foo.baz = 'hi'
-        immutable_foo = foo.immutable()
+        immutable_foo = foo.to_immutable()
         self.assertEqual(immutable_foo.bar, 1)
         self.assertEqual(immutable_foo.baz, 'hi')

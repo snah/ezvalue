@@ -17,7 +17,7 @@ travis_test: FORCE
 	nose2 $(NOSE_OPTIONS) -C --coverage ezvalue/__init__.py
 
 test: FORCE
-	nose2 $(NOSE_OPTIONS)
+	nose2 $(NOSE_OPTIONS) test
 
 unittest: FORCE
 	nose2 $(NOSE_OPTIONS) test.unit

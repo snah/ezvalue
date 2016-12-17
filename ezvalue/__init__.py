@@ -104,7 +104,7 @@ class _MutableValueBase(_ValueBase):
         for name, value in kwargs.items():
             setattr(self, name, value)
 
-    def immutable(self):
+    def to_immutable(self):
         """Create an immutable value object from this mutable instance.
 
         Create an new instance of the complementary (immutable) Value
@@ -152,7 +152,7 @@ class ValueMeta(type):
         super().__init__(name, bases, namespace)
         attributes = {name for name in cls.__dict__
                       if not name.startswith('_')}
-        attributes -= {'Mutable', 'mutable'}
+        attributes -= {'Mutable', 'to_mutable'}
         cls._attributes = attributes
 
         class SubclassedMutable(_MutableValueBase):
@@ -231,7 +231,7 @@ class Value(_ValueBase, metaclass=ValueMeta):
                                      .format(name))
             setattr(self, name, value)
 
-    def mutable(self):
+    def to_mutable(self):
         """Return a mutable copy of the value object.
 
         Create a new instance of the complementary mutable value
