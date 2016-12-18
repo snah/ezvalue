@@ -176,6 +176,17 @@ class TestValueObject(unittest.TestCase, _TestValueObjetBase):
         with self.assertRaises(AttributeError):
             del foo.non_existing
 
+    def test_additional_methods(self):
+        class ValueWithMethod(ezvalue.Value):
+            x = """test"""
+
+            def method(self):
+                return 'hi'
+
+        
+        value = ValueWithMethod(x=1)
+        self.assertEqual(value.method(), 'hi')
+
 
 class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
     CUT = Foo.Mutable   # Class Under Test

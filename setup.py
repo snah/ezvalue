@@ -6,8 +6,9 @@ readme_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'README.m
 with open(readme_path, encoding='utf-8') as f:
     long_description = f.read()
 
-setuptools.setup(name='ezvalue',
-    version='0.1.1',
+setuptools.setup(
+    name='ezvalue',
+    version='0.1.2',
     description='An elegant and powerfull implementation of a value object.',
     long_description=long_description,
     
