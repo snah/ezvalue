@@ -1,5 +1,7 @@
 
-PYTHON_FILES = ezvalue/__init__.py
+PYTHON_FILES := $(shell find ezvalue -name '*.py')
+PYTHON_FILES += $(shell find test -name '*.py')
+PYTHON_FILES += setup.py
 
 NOSE_OPTIONS = --plugin nose2.plugins.doctests --with-doctest
 
@@ -36,6 +38,7 @@ pypytest: clean FORCE
 lint: fix-whitespace
 	@pylama --options=pylama_for_tests.ini test || true
 	@pylama ezvalue || true
+	@pylama setup.py --ignore D100 || true
 
 %.fixed_whitespace: %
 	@if grep '^\s\+$$' --quiet $<; then sed -i 's/^\s\+$$//' $<; fi

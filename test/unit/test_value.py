@@ -178,13 +178,12 @@ class TestValueObject(unittest.TestCase, _TestValueObjetBase):
 
     def test_additional_methods(self):
         class ValueWithMethod(ezvalue.Value):
-            x = """test"""
+            bar = """test"""
 
             def method(self):
                 return 'hi'
 
-        
-        value = ValueWithMethod(x=1)
+        value = ValueWithMethod(bar=1)
         self.assertEqual(value.method(), 'hi')
 
 

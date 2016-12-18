@@ -151,8 +151,8 @@ class ValueMeta(type):
         # pylint: disable = protected-access
         super().__init__(name, bases, namespace)
         attributes = {name for name in cls.__dict__
-                      if not name.startswith('_')
-                      and not callable(getattr(cls, name))}
+                      if not name.startswith('_') and
+                      not callable(getattr(cls, name))}
         attributes -= {'Mutable', 'to_mutable'}
         cls._attributes = attributes
 
