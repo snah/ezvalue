@@ -19,7 +19,7 @@ docs: FORCE
 	sphinx-build -b html docs/ docs/_build/
 
 travis_test: FORCE
-	nose2 $(NOSE_OPTIONS) -C --coverage ezvalue/__init__.py test
+	nose2 $(NOSE_OPTIONS) -C --coverage ezvalue test
 
 test: FORCE
 	nose2 $(NOSE_OPTIONS) test
@@ -52,7 +52,7 @@ venv:
 	@echo -e "\033[33mDon't forget to manually activate the virtual environment:\033[0m"
 	@echo "source venv/bin/activate"
 
-README:
+README: README.md
 	pandoc --from=markdown --to=rst --output=README README.md
 
 FORCE:
