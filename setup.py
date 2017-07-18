@@ -4,7 +4,7 @@ import os.path
 import setuptools
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
-README_PATH = os.path.join(ROOT_DIR, 'README.md')
+README_PATH = os.path.join(ROOT_DIR, 'README')
 
 with open(README_PATH, encoding='utf-8') as f:
     LONG_DESCRIPTION = f.read()

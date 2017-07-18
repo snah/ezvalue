@@ -5,7 +5,7 @@ PYTHON_FILES += setup.py
 
 NOSE_OPTIONS = --plugin nose2.plugins.doctests --with-doctest
 
-default: coverage lint REAME
+default: coverage lint README
 
 clean:
 	find . -name __pycache__ -prune -exec rm -rf {} +
@@ -52,7 +52,18 @@ venv:
 	@echo -e "\033[33mDon't forget to manually activate the virtual environment:\033[0m"
 	@echo "source venv/bin/activate"
 
+PYPI: README dist
+	twine upload dist/*
+
+TESTPYPI: README dist
+	twine upload dist/* -r testpypi
+
 README: README.md
 	pandoc --from=markdown --to=rst --output=README README.md
+
+dist: FORCE
+	rm -rf dist build
+	python setup.py sdist
+	python setup.py bdist_wheel --universal
 
 FORCE:
