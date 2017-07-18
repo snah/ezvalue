@@ -178,7 +178,7 @@ class Value(_ValueBase, metaclass=ValueMeta):
     in the subclass body. The value of the attributes should be a
     docstring describing the attribute. Valid attribute names are
     any valid python variable name not starting with an underscore
-    except 'Mutable', 'mutable', 'Immutable' and 'immutable'.
+    except 'Mutable', 'to_mutable', 'Immutable' and 'to_immutable'.
 
     Example::
 
@@ -268,6 +268,6 @@ class Value(_ValueBase, metaclass=ValueMeta):
     def __setattr__(self, name, value):
         """Raise AttributeError because object is immutable."""
         if name in self.__dict__ or name not in self:
-            raise AttributeError()
+            raise AttributeError('Object is immutable.')
         else:
             super().__setattr__(name, value)

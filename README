@@ -1,0 +1,27 @@
+|Build Status| |Coverage Status| |Codacy Badge| |Documentation Status|
+
+ezvalue
+=======
+
+An elegant and powerful implementation of a value object.
+
+ezvalue allows you to create new value objects simply by defining a
+subclass. Value objects are immutable, but have helpful functionality to
+create changed clones or a mutable version.
+
+Documentation
+-------------
+
+The documentation can be found on `Read the
+Docs <http://ezvalue.readthedocs.io/en/latest/>`__. A good place to
+start is the
+`tutorial <http://ezvalue.readthedocs.io/en/latest/tutorial.html>`__.
+
+.. |Build Status| image:: https://travis-ci.org/snah/ezvalue.svg?branch=master
+   :target: https://travis-ci.org/snah/ezvalue
+.. |Coverage Status| image:: https://coveralls.io/repos/github/snah/ezvalue/badge.svg?branch=master
+   :target: https://coveralls.io/github/snah/ezvalue?branch=master
+.. |Codacy Badge| image:: https://api.codacy.com/project/badge/Grade/9315320bf4cd4b1daa096e43ef0afae2
+   :target: https://www.codacy.com/app/hans-maree/ezvalue?utm_source=github.com&utm_medium=referral&utm_content=snah/ezvalue&utm_campaign=Badge_Grade
+.. |Documentation Status| image:: https://readthedocs.org/projects/ezvalue/badge/?version=latest
+   :target: http://ezvalue.readthedocs.io/en/latest/?badge=latest

@@ -5,7 +5,7 @@ PYTHON_FILES += setup.py
 
 NOSE_OPTIONS = --plugin nose2.plugins.doctests --with-doctest
 
-default: coverage lint
+default: coverage lint REAME
 
 clean:
 	find . -name __pycache__ -prune -exec rm -rf {} +
@@ -28,7 +28,7 @@ unittest: FORCE
 	nose2 $(NOSE_OPTIONS) test.unit
 
 coverage: FORCE
-	nose2 $(NOSE_OPTIONS) test.unit -C  --coverage ezvalue/__init__.py --coverage-report html
+	nose2 $(NOSE_OPTIONS) test.unit -C  --coverage ezvalue --coverage-report html
 	@sed -n 's/.*<span class="pc_cov">\(100%\)<\/span>.*/\nCoverage: \1\n/ p' htmlcov/index.html
 
 pypytest: clean FORCE
@@ -44,5 +44,15 @@ lint: fix-whitespace
 	@if grep '^\s\+$$' --quiet $<; then sed -i 's/^\s\+$$//' $<; fi
 
 fix-whitespace: $(addsuffix .fixed_whitespace, $(PYTHON_FILES))
+
+venv:
+	rm -rf venv
+	virtualenv venv
+	venv/bin/pip install nose2 cov-core pylama pylama-pylint
+	@echo -e "\033[33mDon't forget to manually activate the virtual environment:\033[0m"
+	@echo "source venv/bin/activate"
+
+README:
+	pandoc --from=markdown --to=rst --output=README README.md
 
 FORCE:
