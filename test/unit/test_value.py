@@ -14,7 +14,7 @@ class Foo(ezvalue.Value):
     baz = """Docstring 2."""
 
 
-class _TestValueObjetBase:
+class _TestValueObjectBase:
     # pylint: disable = no-member
     def test_init_with_kwargs(self):
         # pylint: disable=blacklisted-name
@@ -144,7 +144,7 @@ class _TestValueObjetBase:
         self.assertEqual(foo.baz, baz)
 
 
-class TestValueObject(unittest.TestCase, _TestValueObjetBase):
+class TestValueObject(unittest.TestCase, _TestValueObjectBase):
     CUT = Foo   # Class Under Test
     class_name = 'Foo'
 
@@ -187,7 +187,7 @@ class TestValueObject(unittest.TestCase, _TestValueObjetBase):
         self.assertEqual(value.method(), 'hi')
 
 
-class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
+class TestMutableValueObject(unittest.TestCase, _TestValueObjectBase):
     CUT = Foo.Mutable   # Class Under Test
     class_name = 'MutableFoo'
 
@@ -235,3 +235,27 @@ class TestMutableValueObject(unittest.TestCase, _TestValueObjetBase):
         immutable_foo = foo.to_immutable()
         self.assertEqual(immutable_foo.bar, 1)
         self.assertEqual(immutable_foo.baz, 'hi')
+
+
+class TestInheritance(unittest.TestCase):
+    def test_inherits_attributes_from_baseclass(self):
+        class BaseValue(ezvalue.Value):
+            first = """Docstring 1."""
+
+        class SubValue(BaseValue):
+            second = """Docstring 2."""
+
+        sub_value = SubValue(first=1, second=2)
+
+        self.assertEqual(sub_value.first, 1)
+
+    def test_subclass_adds_own_attributes(self):
+        class BaseValue(ezvalue.Value):
+            first = """Docstring 1."""
+
+        class SubValue(BaseValue):
+            second = """Docstring 2."""
+
+        sub_value = SubValue(first=1, second=2)
+
+        self.assertEqual(sub_value.second, 2)

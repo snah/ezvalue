@@ -11,7 +11,7 @@ with open(README_PATH, encoding='utf-8') as f:
 
 setuptools.setup(
     name='ezvalue',
-    version='0.1.2',
+    version='0.1.3',
     description='An elegant and powerfull implementation of a value object.',
     long_description=LONG_DESCRIPTION,
 
